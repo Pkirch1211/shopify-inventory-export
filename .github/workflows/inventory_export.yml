@@ -2,18 +2,21 @@ name: Shopify Inventory Export
 
 on:
   schedule:
-    - cron: "0 13 * * *"
+    # 6AM, 8AM, 10AM, 12PM, 2PM, 4PM, 6PM Pacific (UTC-8 mapping)
+    # Weekdays only (Mon–Fri)
+    - cron: "0 14,16,18,20,22,0,2 * * 1-5"
   workflow_dispatch: {}
 
 jobs:
   export:
     runs-on: ubuntu-latest
+
     env:
       SHOPIFY_STORE: ${{ secrets.SHOPIFY_STORE }}
       SHOPIFY_TOKEN: ${{ secrets.SHOPIFY_TOKEN }}
 
     steps:
-      - name: Checkout
+      - name: Checkout repository
         uses: actions/checkout@v4
 
       - name: Set up Python

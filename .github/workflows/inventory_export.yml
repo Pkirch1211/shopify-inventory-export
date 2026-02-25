@@ -1,0 +1,38 @@
+name: Shopify Inventory Export
+
+on:
+  schedule:
+    - cron: "0 13 * * *"
+  workflow_dispatch: {}
+
+jobs:
+  export:
+    runs-on: ubuntu-latest
+    env:
+      SHOPIFY_STORE: ${{ secrets.SHOPIFY_STORE }}
+      SHOPIFY_TOKEN: ${{ secrets.SHOPIFY_TOKEN }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run inventory export
+        run: |
+          python inventory_pull.py
+
+      - name: Upload CSV artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: shopify_inventory_export
+          path: shopify_inventory_export.csv
+          retention-days: 30

@@ -3,7 +3,7 @@ name: Shopify Inventory Export
 on:
   schedule:
     # 6AM, 8AM, 10AM, 12PM, 2PM, 4PM, 6PM Pacific (UTC-8 mapping), weekdays only
-    - cron: "0 14,16,18,20,22,0,2 * * 1-5"
+    - cron: "0 14,15,16,17,18,19,20,21,22,23,0,1,2 * * 1-5"
   workflow_dispatch: {}
 
 jobs:

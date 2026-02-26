@@ -15,6 +15,8 @@ jobs:
     env:
       SHOPIFY_STORE: ${{ secrets.SHOPIFY_STORE }}
       SHOPIFY_TOKEN: ${{ secrets.SHOPIFY_TOKEN }}
+      SHOPIFY_STORE_DTC: ${{ secrets.SHOPIFY_STORE_DTC }}
+      SHOPIFY_TOKEN_DTC: ${{ secrets.SHOPIFY_TOKEN_DTC }}
 
     steps:
       - name: Checkout repository

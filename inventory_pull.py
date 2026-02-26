@@ -42,15 +42,12 @@ def normalize_shop_domain(shop_value: str) -> str:
 def gql(shop_domain: str, token: str, query: str, variables: dict):
     url = f"https://{shop_domain}/admin/api/{API_VERSION}/graphql.json"
     headers = {"X-Shopify-Access-Token": token, "Content-Type": "application/json"}
-
     resp = requests.post(url, json={"query": query, "variables": variables}, headers=headers, timeout=60)
     resp.raise_for_status()
     payload = resp.json()
-
     if "errors" in payload:
         msgs = "; ".join(e.get("message", str(e)) for e in payload["errors"])
         raise RuntimeError(f"Shopify GraphQL error ({shop_domain}): {msgs}")
-
     return payload["data"]
 
 def extract_qty(level_node: dict) -> tuple[int, int]:
@@ -63,7 +60,11 @@ def extract_qty(level_node: dict) -> tuple[int, int]:
             available = q["quantity"]
     return on_hand, available
 
-def pull_store_inventory(store_label: str, shop_raw: str, token: str, writer: csv.writer):
+def pull_store_inventory(store_label: str, shop_raw: str, token: str) -> dict[str, dict]:
+    """
+    Returns dict keyed by SKU:
+      { "SKU123": {"Store": "...", "SKU": "...", "On Hand": int, "Available": int} }
+    """
     shop_domain = normalize_shop_domain(shop_raw)
 
     print(f"\n=== {store_label} ===", flush=True)
@@ -72,8 +73,8 @@ def pull_store_inventory(store_label: str, shop_raw: str, token: str, writer: cs
 
     after = None
     page = 0
-    written = 0
     started = time.time()
+    out: dict[str, dict] = {}
 
     while True:
         page += 1
@@ -91,18 +92,21 @@ def pull_store_inventory(store_label: str, shop_raw: str, token: str, writer: cs
 
             levels = node["inventoryItem"]["inventoryLevels"]["edges"]
             if not levels:
-                writer.writerow([store_label, sku, 0, 0])
-                written += 1
-                continue
+                on_hand, available = 0, 0
+            else:
+                on_hand, available = extract_qty(levels[0]["node"])
 
-            on_hand, available = extract_qty(levels[0]["node"])
-            writer.writerow([store_label, sku, on_hand, available])
-            written += 1
+            out[sku] = {
+                "Store": store_label,
+                "SKU": sku,
+                "On Hand": int(on_hand),
+                "Available": int(available),
+            }
 
         dt = time.time() - t0
         elapsed = time.time() - started
         print(
-            f"Page {page}: fetched {len(edges)} variants, wrote {written} rows "
+            f"Page {page}: fetched {len(edges)} variants, unique SKUs so far {len(out)} "
             f"({dt:.1f}s this page, {elapsed/60:.1f} min total)",
             flush=True
         )
@@ -113,24 +117,37 @@ def pull_store_inventory(store_label: str, shop_raw: str, token: str, writer: cs
         after = conn["pageInfo"]["endCursor"]
         time.sleep(0.1)
 
-    print(f"Done ({store_label}). Wrote {written} rows.", flush=True)
+    print(f"Done ({store_label}). Unique SKUs: {len(out)}", flush=True)
+    return out
 
 def main():
-    # Store 1 (your existing store)
-    shop1 = os.getenv("SHOPIFY_STORE")
-    tok1 = os.getenv("SHOPIFY_TOKEN")
+    # Store 1 (Wholesale / canonical)
+    shop_wh = os.getenv("SHOPIFY_STORE")
+    tok_wh = os.getenv("SHOPIFY_TOKEN")
 
-    # Store 2 (DTC)
-    shop2 = os.getenv("SHOPIFY_STORE_DTC")
-    tok2 = os.getenv("SHOPIFY_TOKEN_DTC")
+    # Store 2 (DTC / fallback)
+    shop_dtc = os.getenv("SHOPIFY_STORE_DTC")
+    tok_dtc = os.getenv("SHOPIFY_TOKEN_DTC")
 
     missing = []
-    if not shop1 or not tok1:
+    if not shop_wh or not tok_wh:
         missing.append("SHOPIFY_STORE / SHOPIFY_TOKEN")
-    if not shop2 or not tok2:
+    if not shop_dtc or not tok_dtc:
         missing.append("SHOPIFY_STORE_DTC / SHOPIFY_TOKEN_DTC")
     if missing:
         raise ValueError("Missing env vars: " + ", ".join(missing))
+
+    # Pull both stores
+    wh = pull_store_inventory("Wholesale", shop_wh, tok_wh)
+    dtc = pull_store_inventory("DTC", shop_dtc, tok_dtc)
+
+    # Deduplicate: prefer Wholesale; include DTC-only SKUs
+    merged: dict[str, dict] = dict(wh)
+    dtc_only = 0
+    for sku, row in dtc.items():
+        if sku not in merged:
+            merged[sku] = row
+            dtc_only += 1
 
     os.makedirs("exports", exist_ok=True)
     out_path = os.path.join("exports", "shopify_inventory_export.csv")
@@ -138,11 +155,15 @@ def main():
     with open(out_path, "w", newline="", encoding="utf-8") as f:
         writer = csv.writer(f)
         writer.writerow(["Store", "SKU", "On Hand", "Available"])
+        for sku in sorted(merged.keys()):
+            r = merged[sku]
+            writer.writerow([r["Store"], r["SKU"], r["On Hand"], r["Available"]])
 
-        pull_store_inventory("Wholesale", shop1, tok1, writer)
-        pull_store_inventory("DTC", shop2, tok2, writer)
-
-    print(f"\n✅ Combined export written to {out_path}", flush=True)
+    print(
+        f"\n✅ Export written to {out_path}\n"
+        f"Wholesale SKUs: {len(wh)} | DTC SKUs: {len(dtc)} | DTC-only kept: {dtc_only} | Final unique SKUs: {len(merged)}",
+        flush=True
+    )
 
 if __name__ == "__main__":
     main()

@@ -77,7 +77,11 @@ def extract_qty(level_node: dict) -> tuple[int, int]:
     return on_hand, available
 
 def main():
-    out_path = "shopify_inventory_export.csv"
+    # Always write "latest" to a stable path for Power Query
+    export_dir = "exports"
+    os.makedirs(export_dir, exist_ok=True)
+    out_path = os.path.join(export_dir, "shopify_inventory_export.csv")
+
     page_size = 250
 
     print(f"Using shop domain: {SHOP_DOMAIN}", flush=True)

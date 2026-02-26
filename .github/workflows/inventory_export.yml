@@ -2,14 +2,15 @@ name: Shopify Inventory Export
 
 on:
   schedule:
-    # 6AM, 8AM, 10AM, 12PM, 2PM, 4PM, 6PM Pacific (UTC-8 mapping)
-    # Weekdays only (Mon–Fri)
+    # 6AM, 8AM, 10AM, 12PM, 2PM, 4PM, 6PM Pacific (UTC-8 mapping), weekdays only
     - cron: "0 14,16,18,20,22,0,2 * * 1-5"
   workflow_dispatch: {}
 
 jobs:
   export:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
 
     env:
       SHOPIFY_STORE: ${{ secrets.SHOPIFY_STORE }}
@@ -18,6 +19,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          persist-credentials: true
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -33,9 +36,17 @@ jobs:
         run: |
           python inventory_pull.py
 
-      - name: Upload CSV artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: shopify_inventory_export
-          path: shopify_inventory_export.csv
-          retention-days: 30
+      - name: Commit updated CSV (latest only)
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          git add exports/shopify_inventory_export.csv
+
+          if git diff --cached --quiet; then
+            echo "No changes to commit."
+            exit 0
+          fi
+
+          git commit -m "Update latest inventory export"
+          git push

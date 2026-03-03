@@ -60,7 +60,7 @@ Wholesale,11-0245-A,8,8
 Wholesale,11-0246,45,45
 Wholesale,11-0351,3312,2096
 Wholesale,11-0351-A,0,0
-Wholesale,11-0450,1460,684
+Wholesale,11-0450,1459,683
 Wholesale,11-0450-A,0,0
 Wholesale,11-0450-B,0,0
 Wholesale,11-0450-CP24,-16,-16
@@ -78,7 +78,7 @@ Wholesale,11-1609,601,0
 Wholesale,11-1611,1504,868
 Wholesale,11-1612,212,0
 Wholesale,11-1616,18,18
-Wholesale,11-1617,12160,11084
+Wholesale,11-1617,12157,11081
 Wholesale,11-1618,0,0
 Wholesale,11-1619,16,10
 Wholesale,11-2101,554,0
@@ -246,12 +246,12 @@ Wholesale,LL-00-0018,0,0
 Wholesale,LL-01-2026,150,150
 Wholesale,LL-11-1108,598,0
 Wholesale,LL-11-1108-Inner,0,0
-Wholesale,LL-11-1621,3248,2212
+Wholesale,LL-11-1621,3247,2211
 Wholesale,LL-11-2507-A,4069,4069
-Wholesale,LL-11-2508-CP12,12433,8167
+Wholesale,LL-11-2508-CP12,10033,5767
 Wholesale,LL-11-2520-CP12,2132,1120
 Wholesale,LL-11-3008,356,53
-Wholesale,LL-11-3064,500,296
+Wholesale,LL-11-3064,499,295
 Wholesale,LL-11-3072,0,0
 Wholesale,LL-11-3077,24,0
 Wholesale,LL-11-3078,444,426
@@ -299,7 +299,7 @@ Wholesale,LL-12-3066,145,145
 Wholesale,LL-12-3066-CP12,11151,11092
 Wholesale,LL-12-3082,1,1
 Wholesale,LL-12-3082-CP12,16252,16236
-Wholesale,LL-12-3102,31769,28786
+Wholesale,LL-12-3102,29369,26386
 Wholesale,LL-12-3104,0,0
 Wholesale,LL-12-3109,9340,9225
 Wholesale,LL-12-3110,0,0
@@ -336,7 +336,7 @@ Wholesale,LL-12-3233,0,0
 Wholesale,LL-12-3238,0,0
 Wholesale,LL-12-3242,0,0
 Wholesale,LL-12-3288,0,0
-Wholesale,LL-14-3083,5358,4329
+Wholesale,LL-14-3083,5357,4328
 Wholesale,LL-14-3084,0,0
 Wholesale,LL-14-3085,0,-6
 Wholesale,LL-14-3086,0,0
@@ -352,7 +352,7 @@ Wholesale,LL-16-3141,0,0
 Wholesale,LL-16-3148,1557,0
 Wholesale,LL-16-3149,39669,32445
 Wholesale,LL-16-3150,389,0
-Wholesale,LL-16-3151,577,-1
+Wholesale,LL-16-3151,578,0
 Wholesale,LL-16-3152,3798,822
 Wholesale,LL-16-3153,1119,0
 Wholesale,LL-16-3154,0,-1200
@@ -427,7 +427,7 @@ Wholesale,LL-98-3185,822,546
 Wholesale,LL-98-3186,415,1
 Wholesale,LL-98-3187,1718,1454
 Wholesale,LL-98-3188,14,14
-Wholesale,LL-98-3189,32822,23002
+Wholesale,LL-98-3189,27806,17986
 Wholesale,LL-98-3190,503,131
 Wholesale,LL-98-3191,528,0
 Wholesale,LL-98-3221,24,24
